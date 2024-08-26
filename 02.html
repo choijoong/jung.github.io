@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSL 통신 시뮬레이션</title>
+    <style>
+        .ssl-animation {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .arrow {
+            padding: 20px;
+            margin: 10px;
+            background-color: lightcoral;
+            border-radius: 10px;
+            font-size: 20px;
+            width: 150px;
+            text-align: center;
+        }
+        #plane {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 50px;
+            height: 50px;
+            transform: translateY(-50%);
+            transition: left 1s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SSL 통신 시뮬레이션</h1>
+    </header>
+    <main>
+        <section>
+            <button onclick="startSSLSimulation()">시뮬레이션 시작</button>
+            <div class="ssl-animation" id="ssl-animation">
+                <div class="arrow" id="client">클라이언트</div>
+                <img src="images/4741593.png" id="plane" alt="비행기">
+                <div class="arrow" id="server">서버</div>
+            </div>
+            <div id="ssl-status"></div>
+        </section>
+    </main>
+    <script>
+        function startSSLSimulation() {
+            const plane = document.getElementById('plane');
+            const status = document.getElementById('ssl-status');
+
+            // 초기화
+            plane.style.left = '0';
+            status.innerText = '';
+
+            setTimeout(() => {
+                status.innerText = '클라이언트가 서버에 공개키 요청...';
+                plane.style.left = 'calc(50% - 25px)'; // 비행기 중간으로 이동
+            }, 1000);
+
+            setTimeout(() => {
+                status.innerText = '서버가 공개키 전송...';
+                plane.style.left = 'calc(100% - 75px)'; // 비행기 서버로 이동
+            }, 2000);
+
+            setTimeout(() => {
+                status.innerText = '클라이언트가 데이터를 공개키로 암호화하여 전송...';
+                plane.style.left = 'calc(50% - 25px)'; // 비행기 중간으로 이동
+            }, 3000);
+
+            setTimeout(() => {
+                status.innerText = '서버가 개인키로 데이터를 복호화...';
+                plane.style.left = '0'; // 비행기 클라이언트로 돌아옴
+            }, 4000);
+
+            setTimeout(() => {
+                status.innerText = 'SSL 통신 완료!';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHA-256 해시 함수 시뮬레이션</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    <style>
+        .animation-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .arrow {
+            display: inline-block;
+            padding: 20px;
+            margin: 10px;
+            background-color: lightgreen;
+            border-radius: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SHA-256 해시 함수 시뮬레이션</h1>
+    </header>
+    <main>
+        <section>
+            <h2>해시 생성</h2>
+            <div>
+                <input type="text" id="hash-input" placeholder="해시할 텍스트를 입력하세요">
+                <button onclick="hashText()">해시 생성</button>
+            </div>
+            <div class="animation-container">
+                <div class="arrow" id="input-text">입력값: <span id="input-value"></span></div>
+                <div class="arrow" id="hashed-text">해시 값: <span id="hash-value"></span></div>
+            </div>
+        </section>
+    </main>
+    <script>
+        function hashText() {
+            const input = document.getElementById('hash-input').value;
+            const hash = CryptoJS.SHA256(input).toString();
+            
+            document.getElementById('input-value').innerText = input;
+            document.getElementById('hash-value').innerText = hash;
+        }
+    </script>
+</body>
+</html>

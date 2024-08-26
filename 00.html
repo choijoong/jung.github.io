@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개인정보 보호의 중요성</title>
+    <style>
+        .animation-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .arrow {
+            display: inline-block;
+            padding: 20px;
+            margin: 10px;
+            background-color: lightblue;
+            border-radius: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>개인정보 보호 시스템</h1>
+    </header>
+    <main>
+        <section>
+            <h2>RSA 암호화 알고리즘 시뮬레이션</h2>
+            <div>
+                <input type="number" id="rsa-input" placeholder="암호화할 숫자를 입력하세요">
+                <button onclick="rsaEncrypt()">암호화</button>
+            </div>
+            <div class="animation-container">
+                <div class="arrow" id="step-1">입력값: <span id="input-value"></span></div>
+                <div class="arrow" id="step-2">암호화 값: <span id="encrypted-value"></span></div>
+            </div>
+        </section>
+    </main>
+    <script>
+        function rsaEncrypt() {
+            const input = parseInt(document.getElementById('rsa-input').value, 10);
+            const n = 33;  // 예시로 사용한 소수 곱
+            const e = 3;   // 공개키
+            const encrypted = Math.pow(input, e) % n;
+
+            document.getElementById('input-value').innerText = input;
+            document.getElementById('encrypted-value').innerText = encrypted;
+        }
+    </script>
+</body>
+</html>
