@@ -2,86 +2,231 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SSL 통신 시뮬레이션</title>
     <style>
-        .ssl-animation {
-            position: relative;
-            width: 100%;
-            height: 200px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .arrow {
-            padding: 20px;
-            margin: 10px;
-            background-color: lightcoral;
-            border-radius: 10px;
-            font-size: 20px;
-            width: 150px;
+        /* 스타일 설정 */
+        body {
+            font-family: Arial, sans-serif;
             text-align: center;
         }
-        #plane {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 50px;
-            height: 50px;
-            transform: translateY(-50%);
-            transition: left 1s ease-in-out;
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 30px;
+        }
+        .entity {
+            width: 200px;
+            margin: 0 50px;
+        }
+        .entity h2 {
+            margin-bottom: 20px;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e0f7fa;
+            border-radius: 8px;
+            display: inline-block;
+            max-width: 220px;
+            word-wrap: break-word;
+            text-align: left;
+            font-size: 14px;
+        }
+        .explanation {
+            margin-top: 30px;
+            text-align: left;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        #start-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .arrow {
+            font-size: 30px;
+            margin: 20px;
+        }
+        #input-section {
+            margin-top: 30px;
+        }
+        #input-section input {
+            width: 300px;
+            padding: 5px;
+            font-size: 16px;
+        }
+        #input-section button {
+            padding: 5px 10px;
+            font-size: 16px;
+        }
+        .encrypted {
+            background-color: #c8e6c9;
+        }
+        .data {
+            background-color: #fff9c4;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: left;
+            word-wrap: break-word;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .data h3 {
+            margin-top: 0;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>SSL 통신 시뮬레이션</h1>
-    </header>
-    <main>
-        <section>
-            <button onclick="startSSLSimulation()">시뮬레이션 시작</button>
-            <div class="ssl-animation" id="ssl-animation">
-                <div class="arrow" id="client">클라이언트</div>
-                <img src="images/4741593.png" id="plane" alt="비행기">
-                <div class="arrow" id="server">서버</div>
-            </div>
-            <div id="ssl-status"></div>
-        </section>
-    </main>
+    <h1>SSL 통신 시뮬레이션</h1>
+    <div id="input-section">
+        <p>암호화할 메시지를 입력하세요:</p>
+        <input type="text" id="user-message" placeholder="메시지를 입력하세요">
+        <button id="start-btn">시뮬레이션 시작</button>
+    </div>
+    <div class="container">
+        <div class="entity" id="client">
+            <h2>클라이언트</h2>
+            <div id="client-messages"></div>
+        </div>
+        <div class="entity" id="server">
+            <h2>서버</h2>
+            <div id="server-messages"></div>
+        </div>
+    </div>
+    <div class="data" id="data-display">
+        내부 데이터가 여기에 표시됩니다.
+    </div>
+    <div class="explanation" id="explanation">
+        SSL 통신 과정을 시뮬레이션합니다. 메시지를 입력하고 "시뮬레이션 시작" 버튼을 눌러 시작하세요.
+    </div>
+    <!-- CryptoJS 라이브러리 불러오기 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        function startSSLSimulation() {
-            const plane = document.getElementById('plane');
-            const status = document.getElementById('ssl-status');
+        document.getElementById('start-btn').addEventListener('click', startSimulation);
 
-            // 초기화
-            plane.style.left = '0';
-            status.innerText = '';
+        function startSimulation() {
+            const clientMessages = document.getElementById('client-messages');
+            const serverMessages = document.getElementById('server-messages');
+            const explanation = document.getElementById('explanation');
+            const dataDisplay = document.getElementById('data-display');
+            const userMessage = document.getElementById('user-message').value;
 
-            setTimeout(() => {
-                status.innerText = '클라이언트가 서버에 공개키 요청...';
-                plane.style.left = 'calc(50% - 25px)'; // 비행기 중간으로 이동
-            }, 1000);
+            if (userMessage === '') {
+                alert('암호화할 메시지를 입력하세요.');
+                return;
+            }
 
-            setTimeout(() => {
-                status.innerText = '서버가 공개키 전송...';
-                plane.style.left = 'calc(100% - 75px)'; // 비행기 서버로 이동
-            }, 2000);
+            let step = 0;
 
-            setTimeout(() => {
-                status.innerText = '클라이언트가 데이터를 공개키로 암호화하여 전송...';
-                plane.style.left = 'calc(50% - 25px)'; // 비행기 중간으로 이동
-            }, 3000);
+            clientMessages.innerHTML = '';
+            serverMessages.innerHTML = '';
+            explanation.innerHTML = '';
+            dataDisplay.innerHTML = '';
 
-            setTimeout(() => {
-                status.innerText = '서버가 개인키로 데이터를 복호화...';
-                plane.style.left = '0'; // 비행기 클라이언트로 돌아옴
-            }, 4000);
+            // SSL 시뮬레이션에 사용할 키와 암호화 함수 정의
+            let preMasterSecret = '';
+            let sessionKey = '';
+            let encryptedMessage = '';
+            let decryptedMessage = '';
 
-            setTimeout(() => {
-                status.innerText = 'SSL 통신 완료!';
-            }, 5000);
+            function nextStep() {
+                switch (step) {
+                    case 0:
+                        // Client Hello
+                        clientMessages.innerHTML += '<div class="message">Client Hello<br>지원하는 SSL/TLS 버전 및 암호화 알고리즘</div>';
+                        explanation.innerHTML = '<h2>1. 클라이언트 헬로 (Client Hello)</h2><p>클라이언트가 서버에 연결을 요청합니다. 이때 클라이언트는 지원하는 SSL/TLS 버전, 암호화 알고리즘 목록 등을 서버에 전송합니다.</p>';
+                        dataDisplay.innerHTML = '';
+                        break;
+                    case 1:
+                        // Server Hello
+                        serverMessages.innerHTML += '<div class="message">Server Hello<br>선택한 SSL/TLS 버전 및 암호화 알고리즘</div>';
+                        serverMessages.innerHTML += '<div class="message">서버 인증서 전송 (공개키 포함)</div>';
+                        explanation.innerHTML = '<h2>2. 서버 헬로 (Server Hello)</h2><p>서버가 클라이언트의 요청에 응답합니다. 서버는 사용할 SSL/TLS 버전과 암호화 알고리즘을 선택하고, 자신의 인증서(공개키 포함)를 클라이언트에게 전송합니다.</p>';
+                        dataDisplay.innerHTML = '<h3>서버 공개키</h3><p>공개키: <em>서버의 공개키 (예시)</em></p>';
+                        break;
+                    case 2:
+                        // Client verifies certificate
+                        clientMessages.innerHTML += '<div class="message">서버 인증서 검증</div>';
+                        explanation.innerHTML = '<h2>3. 인증서 검증</h2><p>클라이언트는 서버의 인증서를 검증합니다. 인증서가 신뢰할 수 있는 인증 기관(CA)에 의해 발급되었는지 확인합니다.</p>';
+                        dataDisplay.innerHTML = '<h3>인증서 정보</h3><p>서버 인증서가 유효함을 확인했습니다.</p>';
+                        break;
+                    case 3:
+                        // Client Key Exchange
+                        preMasterSecret = generateRandomString(48); // 프리마스터 시크릿 생성 (48바이트)
+                        let encryptedPreMaster = '암호화된 프리마스터 시크릿';
+                        clientMessages.innerHTML += '<div class="message">프리마스터 시크릿 생성<br>암호화하여 서버로 전송</div>';
+                        explanation.innerHTML = '<h2>4. 클라이언트 키 교환 (Client Key Exchange)</h2><p>클라이언트는 프리마스터 시크릿을 생성하고, 서버의 공개키로 암호화하여 서버에 전송합니다.</p>';
+                        dataDisplay.innerHTML = '<h3>프리마스터 시크릿</h3><p>생성된 프리마스터 시크릿: <em>' + preMasterSecret + '</em></p>' +
+                                                '<h3>암호화된 프리마스터 시크릿</h3><p>암호화된 데이터: <em>' + encryptedPreMaster + '</em></p>';
+                        break;
+                    case 4:
+                        // Server decrypts pre-master secret
+                        sessionKey = CryptoJS.SHA256(preMasterSecret).toString();
+                        serverMessages.innerHTML += '<div class="message">프리마스터 시크릿 복호화<br>세션 키 생성</div>';
+                        explanation.innerHTML = '<h2>5. 서버 키 복호화</h2><p>서버는 자신의 개인키로 프리마스터 시크릿을 복호화합니다. 클라이언트와 서버는 동일한 세션 키를 생성합니다.</p>';
+                        dataDisplay.innerHTML = '<h3>세션 키 생성</h3><p>생성된 세션 키: <em>' + sessionKey + '</em></p>';
+                        break;
+                    case 5:
+                        // Change Cipher Spec
+                        clientMessages.innerHTML += '<div class="message">암호화 방식 변경 알림</div>';
+                        serverMessages.innerHTML += '<div class="message">암호화 방식 변경 알림</div>';
+                        explanation.innerHTML = '<h2>6. 암호화 방식 변경 (Change Cipher Spec)</h2><p>클라이언트와 서버는 앞으로의 통신에 사용할 암호화 사양으로 변경했음을 서로 알립니다.</p>';
+                        dataDisplay.innerHTML = '';
+                        break;
+                    case 6:
+                        // Handshake Finished
+                        clientMessages.innerHTML += '<div class="message">핸드쉐이크 완료 메시지</div>';
+                        serverMessages.innerHTML += '<div class="message">핸드쉐이크 완료 메시지</div>';
+                        explanation.innerHTML = '<h2>7. 핸드쉐이크 완료</h2><p>클라이언트와 서버는 핸드쉐이크 과정이 완료되었음을 확인합니다. 이제 안전한 SSL 통신이 시작됩니다.</p>';
+                        dataDisplay.innerHTML = '';
+                        break;
+                    case 7:
+                        // Secure communication with encrypted message
+                        // 클라이언트에서 메시지 암호화하여 서버로 전송
+                        encryptedMessage = CryptoJS.AES.encrypt(userMessage, sessionKey).toString();
+                        clientMessages.innerHTML += '<div class="message encrypted">암호화된 데이터 전송<br>' + encryptedMessage + '</div>';
+                        // 서버에서 암호화된 메시지 복호화
+                        decryptedMessage = CryptoJS.AES.decrypt(encryptedMessage, sessionKey).toString(CryptoJS.enc.Utf8);
+                        serverMessages.innerHTML += '<div class="message encrypted">암호화된 데이터 수신<br>복호화된 메시지: ' + decryptedMessage + '</div>';
+                        explanation.innerHTML = '<h2>8. 안전한 통신 시작</h2><p>클라이언트는 입력한 메시지를 세션 키를 사용하여 암호화하고 서버에 전송합니다. 서버는 해당 메시지를 복호화하여 원본 메시지를 확인합니다.</p>';
+                        dataDisplay.innerHTML = '<h3>암호화 및 복호화 과정</h3>' +
+                                                '<p><strong>클라이언트 측 암호화:</strong></p>' +
+                                                '<p>원본 메시지: <em>' + userMessage + '</em></p>' +
+                                                '<p>암호화된 메시지: <em>' + encryptedMessage + '</em></p>' +
+                                                '<p><strong>서버 측 복호화:</strong></p>' +
+                                                '<p>복호화된 메시지: <em>' + decryptedMessage + '</em></p>';
+                        break;
+                    default:
+                        explanation.innerHTML = '<h2>SSL 통신 완료</h2><p>시뮬레이션이 완료되었습니다.</p>';
+                        dataDisplay.innerHTML = '';
+                        return;
+                }
+                step++;
+                setTimeout(nextStep, 2500);
+            }
+
+            function generateRandomString(length) {
+                let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let result = '';
+                for (let i = 0; i < length; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            }
+
+            nextStep();
         }
     </script>
 </body>
+</html>
 </html>
