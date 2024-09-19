@@ -4,48 +4,204 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SHA-256 해시 함수 시뮬레이션</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
     <style>
-        .animation-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
+        .container {
+            max-width: 800px;
+            margin: auto;
+            text-align: center;
+            font-family: Arial, sans-serif;
         }
-        .arrow {
-            display: inline-block;
-            padding: 20px;
-            margin: 10px;
-            background-color: lightgreen;
-            border-radius: 10px;
-            font-size: 20px;
+        .section {
+            margin: 20px 0;
+        }
+        .section input {
+            width: 400px;
+            padding: 5px;
+            font-size: 16px;
+        }
+        .section button {
+            padding: 5px 10px;
+            font-size: 16px;
+        }
+        .result, .explanation {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            word-break: break-all;
+            text-align: left;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        h2 {
+            margin-top: 30px;
+        }
+        p {
+            font-size: 16px;
+            text-align: left;
+        }
+        .explanation ul {
+            text-align: left;
+            margin-left: 20px;
+        }
+        .explanation li {
+            margin-bottom: 5px;
+        }
+        .code-block {
+            background-color: #eaeaea;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>SHA-256 해시 함수 시뮬레이션</h1>
-    </header>
-    <main>
-        <section>
-            <h2>해시 생성</h2>
-            <div>
-                <input type="text" id="hash-input" placeholder="해시할 텍스트를 입력하세요">
-                <button onclick="hashText()">해시 생성</button>
-            </div>
-            <div class="animation-container">
-                <div class="arrow" id="input-text">입력값: <span id="input-value"></span></div>
-                <div class="arrow" id="hashed-text">해시 값: <span id="hash-value"></span></div>
-            </div>
-        </section>
-    </main>
+    <div class="container">
+        <header>
+            <h1>SHA-256 해시 함수 시뮬레이션</h1>
+        </header>
+        <main>
+            <section class="section">
+                <h2>SHA-256 해시 함수 설명</h2>
+                <div class="explanation">
+                    <p><strong>SHA-256</strong>은 임의의 길이의 메시지를 256비트(32바이트)의 고정된 해시 값으로 변환하는 암호학적 해시 함수입니다. SHA-256은 다음과 같은 주요 단계를 통해 동작합니다:</p>
+                    <ol>
+                        <li><strong>메시지 패딩</strong>: 메시지를 512비트 블록의 배수로 만들기 위해 패딩을 추가합니다.</li>
+                        <li><strong>메시지 스케줄 생성</strong>: 각 512비트 블록에서 64개의 32비트 워드를 생성합니다.</li>
+                        <li><strong>초기 해시 값 설정</strong>: 미리 정의된 8개의 32비트 초기 해시 값을 사용합니다.</li>
+                        <li><strong>압축 함수 반복</strong>: 각 블록마다 64라운드의 압축 함수 연산을 수행합니다.</li>
+                        <li><strong>최종 해시 값 출력</strong>: 모든 블록 처리가 완료되면, 최종 해시 값을 생성합니다.</li>
+                    </ol>
+                    <p>이 시뮬레이션에서는 SHA-256의 핵심 개념을 이해하기 위해 각 단계를 간략화하여 보여줍니다.</p>
+                </div>
+            </section>
+            <section class="section">
+                <h2>1. 메시지 입력</h2>
+                <p>해시할 메시지를 입력하세요.</p>
+                <input type="text" id="message-input" placeholder="메시지를 입력하세요">
+                <button onclick="computeSHA256()">해시 계산</button>
+            </section>
+            <section class="section">
+                <h2>2. 결과</h2>
+                <div class="result" id="hash-result">
+                    해시 값이 여기에 표시됩니다.
+                </div>
+            </section>
+            <section class="section">
+                <h2>3. SHA-256 작동 원리</h2>
+                <div class="explanation" id="sha-explanation">
+                    각 단계의 설명이 여기에 표시됩니다.
+                </div>
+            </section>
+        </main>
+    </div>
+    <!-- CryptoJS 라이브러리 불러오기 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        function hashText() {
-            const input = document.getElementById('hash-input').value;
-            const hash = CryptoJS.SHA256(input).toString();
-            
-            document.getElementById('input-value').innerText = input;
-            document.getElementById('hash-value').innerText = hash;
+        function computeSHA256() {
+            var message = document.getElementById('message-input').value;
+            if (message === '') {
+                alert('메시지를 입력하세요.');
+                return;
+            }
+
+            // 해시 값 계산
+            var hash = CryptoJS.SHA256(message).toString();
+
+            // 결과 표시
+            var hashResult = document.getElementById('hash-result');
+            hashResult.innerHTML = '<strong>입력된 메시지:</strong><br>' + message + '<br><br>' +
+                                   '<strong>SHA-256 해시 값:</strong><br>' + hash;
+
+            // SHA-256 작동 원리 설명 업데이트
+            var explanation = document.getElementById('sha-explanation');
+            explanation.innerHTML = generateSHA256Explanation(message);
+        }
+
+        function generateSHA256Explanation(message) {
+            var explanationHTML = '';
+
+            // 1. 메시지 패딩
+            var originalBits = messageToBits(message);
+            var paddedMessage = padMessage(originalBits);
+            explanationHTML += '<h3>1. 메시지 패딩</h3>';
+            explanationHTML += '<p>원본 메시지의 비트 표현:</p>';
+            explanationHTML += '<div class="code-block">' + originalBits + '</div>';
+            explanationHTML += '<p>패딩된 메시지의 비트 표현:</p>';
+            explanationHTML += '<div class="code-block">' + paddedMessage + '</div>';
+
+            // 2. 메시지 스케줄 생성 (간략화)
+            explanationHTML += '<h3>2. 메시지 스케줄 생성</h3>';
+            explanationHTML += '<p>패딩된 메시지를 512비트 블록으로 나누고, 각 블록에서 64개의 32비트 워드를 생성합니다.</p>';
+
+            // 3. 초기 해시 값 설정
+            explanationHTML += '<h3>3. 초기 해시 값 설정</h3>';
+            explanationHTML += '<p>SHA-256은 다음과 같은 8개의 초기 해시 값을 사용합니다:</p>';
+            explanationHTML += '<div class="code-block">' + getInitialHashValues() + '</div>';
+
+            // 4. 압축 함수 반복 (간략화)
+            explanationHTML += '<h3>4. 압축 함수 반복</h3>';
+            explanationHTML += '<p>각 블록에 대해 64라운드의 압축 함수 연산을 수행합니다.</p>';
+            explanationHTML += '<p>각 라운드에서는 작업 변수가 업데이트되며, 최종적으로 해시 값에 반영됩니다.</p>';
+
+            // 5. 최종 해시 값 출력
+            explanationHTML += '<h3>5. 최종 해시 값 출력</h3>';
+            explanationHTML += '<p>모든 블록 처리가 완료되면, 최종 해시 값이 생성됩니다.</p>';
+
+            return explanationHTML;
+        }
+
+        function messageToBits(message) {
+            var bits = '';
+            for (var i = 0; i < message.length; i++) {
+                var charCode = message.charCodeAt(i);
+                var charBits = charCode.toString(2).padStart(8, '0');
+                bits += charBits + ' ';
+            }
+            return bits.trim();
+        }
+
+        function padMessage(bits) {
+            var originalLength = bits.replace(/ /g, '').length;
+            var paddedBits = bits.replace(/ /g, '') + '1';
+
+            while ((paddedBits.length % 512) !== 448) {
+                paddedBits += '0';
+            }
+
+            var lengthBits = originalLength.toString(2).padStart(64, '0');
+            paddedBits += lengthBits;
+
+            // 512비트마다 공백 추가
+            var formattedBits = '';
+            for (var i = 0; i < paddedBits.length; i += 8) {
+                formattedBits += paddedBits.substr(i, 8) + ' ';
+                if ((i + 8) % 64 === 0) {
+                    formattedBits += '\n';
+                }
+            }
+
+            return formattedBits.trim();
+        }
+
+        function getInitialHashValues() {
+            var initialHashValues = [
+                '6a09e667',
+                'bb67ae85',
+                '3c6ef372',
+                'a54ff53a',
+                '510e527f',
+                '9b05688c',
+                '1f83d9ab',
+                '5be0cd19'
+            ];
+            var formattedValues = '';
+            for (var i = 0; i < initialHashValues.length; i++) {
+                formattedValues += 'H' + (i + 1) + ': ' + initialHashValues[i] + '\n';
+            }
+            return formattedValues.trim();
         }
     </script>
 </body>
